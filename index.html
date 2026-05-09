@@ -668,7 +668,7 @@ img{max-width:100%;display:block}
       <div data-reveal>
         <div class="contact-form">
           <h3 style="font-family:var(--font-display);font-size:1.3rem;font-weight:700;margin-bottom:24px">Send Us a Message</h3>
-          <form action="https://formspree.io/f/your-form-id" method="POST" id="contactForm">
+          <form action="https://formspree.io/f/xdabwjjg" method="POST" id="contactForm">
             <div class="form-row">
               <div class="form-group">
                 <label>Full Name</label>
@@ -804,17 +804,46 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 });
 
 // ─── Form submit feedback ───
-document.getElementById('contactForm').addEventListener('submit', function(e) {
+// document.getElementById('contactForm').addEventListener('submit', function(e) {
+//   e.preventDefault();
+//   const btn = this.querySelector('.form-submit');
+//   const originalText = btn.textContent;
+//   btn.textContent = '✓ Message Sent!';
+//   btn.style.background = 'linear-gradient(135deg, #00e5a0, #00c4ff)';
+//   setTimeout(() => {
+//     btn.textContent = originalText;
+//     btn.style.background = '';
+//     this.reset();
+//   }, 3000);
+// });
+// ─── Form submit to Formspree ───
+document.getElementById('contactForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const btn = this.querySelector('.form-submit');
   const originalText = btn.textContent;
-  btn.textContent = '✓ Message Sent!';
-  btn.style.background = 'linear-gradient(135deg, #00e5a0, #00c4ff)';
-  setTimeout(() => {
-    btn.textContent = originalText;
-    btn.style.background = '';
-    this.reset();
-  }, 3000);
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  try {
+    const res = await fetch(this.action, {
+      method: 'POST',
+      body: new FormData(this),
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      btn.textContent = '✓ Message Sent!';
+      btn.style.background = 'linear-gradient(135deg, #00e5a0, #00c4ff)';
+      this.reset();
+      setTimeout(() => { btn.textContent = originalText; btn.style.background = ''; btn.disabled = false; }, 3000);
+    } else {
+      btn.textContent = '✗ Failed — Try Again';
+      btn.style.background = 'linear-gradient(135deg, #ff5c78, #ff8a5c)';
+      setTimeout(() => { btn.textContent = originalText; btn.style.background = ''; btn.disabled = false; }, 3000);
+    }
+  } catch {
+    btn.textContent = '✗ Network Error';
+    btn.style.background = 'linear-gradient(135deg, #ff5c78, #ff8a5c)';
+    setTimeout(() => { btn.textContent = originalText; btn.style.background = ''; btn.disabled = false; }, 3000);
+  }
 });
 
 // ─── Counter animation ───
